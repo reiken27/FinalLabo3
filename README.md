@@ -1,4 +1,5 @@
 # tup2024
+Ejemplo de uso
 
 _CREAR CLIENTE_
 Endpoint POST /cliente/crearCliente Ejemplo:
