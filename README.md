@@ -23,6 +23,7 @@ Endpoint POST /cuenta/crearCuenta Ejemplo:
 _GET LISTA CUENTAS_
 http://127.0.0.1:8080/cuenta/cuentas
 
+*Prestamo*
 Endpoint POST /api/prestamo Ejemplo
 {
 "dniCliente": 38531657,
@@ -30,3 +31,10 @@ Endpoint POST /api/prestamo Ejemplo
 "monto": 5000.0,
 "moneda": "DOLARES"
 }
+GET
+api/prestamo/{dni}
+
+pago prestamo
+POST
+api/prestamos/{dni}/pagar
+{"numeroCuotas":4}
