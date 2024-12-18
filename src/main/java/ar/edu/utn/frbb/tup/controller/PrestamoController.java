@@ -43,7 +43,7 @@ public class PrestamoController {
             }
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            e.printStackTrace(); // Añade esto para depuración
+            //e.printStackTrace(); // Añade esto para depuración
             return ResponseEntity.status(500).build();
         }
     }

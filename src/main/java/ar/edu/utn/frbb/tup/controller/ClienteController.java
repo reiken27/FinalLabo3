@@ -91,6 +91,7 @@ public class ClienteController {
 
     // para estructurar la respuesta de error, define como se tiene que ver la respuesta del error
     static class ErrorResponse {
+
         private int errorCode;
         private String errorMessage;
 

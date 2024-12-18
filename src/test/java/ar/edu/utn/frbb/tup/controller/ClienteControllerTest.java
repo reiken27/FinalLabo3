@@ -77,9 +77,10 @@ public class ClienteControllerTest {
             throw new RuntimeException(e);
         }
 
-        mockMvc.perform(post("/cliente")
+        mockMvc.perform(post("/cliente/crearCliente")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(clienteDto)))
+                .content(objectMapper.writeValueAsString(clienteDto))
+        )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dni", is(12345678)))
                 .andExpect(jsonPath("$.nombre", is("Juan")))
@@ -97,7 +98,7 @@ public class ClienteControllerTest {
             throw new RuntimeException(e);
         }
 
-        mockMvc.perform(post("/cliente")
+        mockMvc.perform(post("/cliente/crearCliente")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(clienteDto)))
                 .andExpect(status().isConflict())
@@ -147,7 +148,7 @@ public class ClienteControllerTest {
         doThrow(new TipoPersonaInvalidoException("El tipo de persona debe ser 'fisica' o 'juridica'"))
                 .when(clienteValidator).validate(any(ClienteDto.class));
 
-        mockMvc.perform(post("/cliente")
+        mockMvc.perform(post("/cliente/crearCliente")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(clienteDto)))
                 .andExpect(status().isBadRequest())

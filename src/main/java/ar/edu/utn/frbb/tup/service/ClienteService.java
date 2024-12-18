@@ -27,7 +27,7 @@ public class ClienteService {
     public ClienteService() {
     }
 
-    public Cliente darDeAltaCliente(Cliente cliente) throws ClienteAlreadyExistsException, TipoPersonaInvalidoException{
+    public Cliente darDeAltaCliente(Cliente cliente) throws ClienteAlreadyExistsException, TipoPersonaInvalidoException {
         // Verifica si el cliente ya existe en la base de datos en memoria
         if (clienteDao.find(cliente.getDni(), false) != null) {
             throw new ClienteAlreadyExistsException("Ya existe un cliente con DNI " + cliente.getDni());

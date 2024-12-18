@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import ar.edu.utn.frbb.tup.persistence.PrestamoDao;
 
 @Service
 public class PrestamoService {
+
     @Autowired
     private ClienteDao clienteDao;
     @Autowired
@@ -31,59 +33,60 @@ public class PrestamoService {
     @Autowired
     private CalificacionCreditoService CalCredService;
 
-        public PrestamoResponse SolicitarPrestamo(PrestamoRequest request){
-            Cliente cliente = clienteDao.find(request.getDniCliente(),true);
-            if (cliente == null) {
-               throw new IllegalArgumentException("El cliente solicitado no existe");
-            }
-            List<Prestamo> prestamosActivos = prestamoDao.findByClienteId(cliente.getId())
-                    .stream()
-                    .filter(prestamo -> prestamo.getSaldoRestante()>0)
-                    .collect(Collectors.toList());
-            if (!prestamosActivos.isEmpty()) {
-                throw new IllegalArgumentException("El cliente ya tiene un préstamo activo");
-            }
-
-            Cuenta cuenta = cuentaService.findCuentaByClienteAndMoneda(cliente, request.getMoneda());
-            if (cuenta == null) {
-                throw new IllegalArgumentException("El cliente no tiene una cuenta en la moneda solicitada");
-            }
-
-            boolean calificacionAprobada = CalCredService.verificarCalificacion(String.valueOf(cliente.getDni()));
-            if (!calificacionAprobada) {
-                throw new IllegalArgumentException("El cliente no tiene una buena calificación crediticia");
-            }
-
-            // Crea un nuevo prestamo
-            Prestamo prestamo = new Prestamo();
-            prestamo.setCliente(cliente);
-            prestamo.setMonto(request.getMonto());
-            prestamo.setMoneda(request.getMoneda());
-            prestamo.setPlazoMeses(request.getPlazo());
-            prestamo.setFechaInicio(LocalDate.now());
-
-            // Calcula el plan de pagos y el saldo restante con intereses
-            List<Prestamo.PlanPago> planPagos = calcularPlanPagos(prestamo);
-            prestamo.setPlanPagos(planPagos);
-
-            // Calcula el saldo restante del prestamo
-            double saldoRestante = planPagos.stream().mapToDouble(Prestamo.PlanPago::getMonto).sum();
-            BigDecimal saldoRestanteRounded = new BigDecimal(saldoRestante).setScale(2, RoundingMode.HALF_UP);
-            prestamo.setSaldoRestante(saldoRestanteRounded.doubleValue());
-
-            prestamoDao.save(prestamo);
-
-            // Actualiza saldo de la cuenta
-            cuentaService.actualizarSaldo(cuenta.getNumeroCuenta(), cuenta.getBalance() + request.getMonto());
-
-            // la respuesta del préstamo
-            PrestamoResponse response = new PrestamoResponse();
-            response.setEstado("APROBADO");
-            response.setMensaje("El monto del préstamo fue acreditado en su cuenta");
-            response.setPlanPagos(planPagos.stream().map(this::convertirPlanPago).collect(Collectors.toList()));
-
-            return response;
+    public PrestamoResponse SolicitarPrestamo(PrestamoRequest request) {
+        Cliente cliente = clienteDao.find(request.getDniCliente(), true);
+        if (cliente == null) {
+            throw new IllegalArgumentException("El cliente solicitado no existe");
         }
+        List<Prestamo> prestamosActivos = prestamoDao.findByClienteId(cliente.getId())
+                .stream()
+                .filter(prestamo -> prestamo.getSaldoRestante() > 0)
+                .collect(Collectors.toList());
+        if (!prestamosActivos.isEmpty()) {
+            throw new IllegalArgumentException("El cliente ya tiene un préstamo activo");
+        }
+
+        Cuenta cuenta = cuentaService.findCuentaByClienteAndMoneda(cliente, request.getMoneda());
+        if (cuenta == null) {
+            throw new IllegalArgumentException("El cliente no tiene una cuenta en la moneda solicitada");
+        }
+
+        boolean calificacionAprobada = CalCredService.verificarCalificacion(String.valueOf(cliente.getDni()));
+        if (!calificacionAprobada) {
+            throw new IllegalArgumentException("El cliente no tiene una buena calificación crediticia");
+        }
+
+        // Crea un nuevo prestamo
+        Prestamo prestamo = new Prestamo();
+        prestamo.setCliente(cliente);
+        prestamo.setMonto(request.getMonto());
+        prestamo.setMoneda(request.getMoneda());
+        prestamo.setPlazoMeses(request.getPlazo());
+        prestamo.setFechaInicio(LocalDate.now());
+
+        // Calcula el plan de pagos y el saldo restante con intereses
+        List<Prestamo.PlanPago> planPagos = calcularPlanPagos(prestamo);
+        prestamo.setPlanPagos(planPagos);
+
+        // Calcula el saldo restante del prestamo
+        double saldoRestante = planPagos.stream().mapToDouble(Prestamo.PlanPago::getMonto).sum();
+        BigDecimal saldoRestanteRounded = new BigDecimal(saldoRestante).setScale(2, RoundingMode.HALF_UP);
+        prestamo.setSaldoRestante(saldoRestanteRounded.doubleValue());
+
+        prestamoDao.save(prestamo);
+
+        // Actualiza saldo de la cuenta
+        cuentaService.actualizarSaldo(cuenta.getNumeroCuenta(), cuenta.getBalance() + request.getMonto());
+
+        // la respuesta del préstamo
+        PrestamoResponse response = new PrestamoResponse();
+        response.setEstado("APROBADO");
+        response.setMensaje("El monto del préstamo fue acreditado en su cuenta");
+        response.setPlanPagos(planPagos.stream().map(this::convertirPlanPago).collect(Collectors.toList()));
+
+        return response;
+    }
+
     private List<Prestamo.PlanPago> calcularPlanPagos(Prestamo prestamo) {
         List<Prestamo.PlanPago> planPagos = new ArrayList<>();
         double montoPrestamo = prestamo.getMonto();
@@ -92,8 +95,8 @@ public class PrestamoService {
         int plazoMeses = prestamo.getPlazoMeses();
 
 // Calcula el pago mensual utilizando la formula de la cuota fija
-        double pagoMensual = (montoPrestamo * tasaInteresMensual * Math.pow(1 + tasaInteresMensual, plazoMeses)) /
-                (Math.pow(1 + tasaInteresMensual, plazoMeses) - 1);
+        double pagoMensual = (montoPrestamo * tasaInteresMensual * Math.pow(1 + tasaInteresMensual, plazoMeses))
+                / (Math.pow(1 + tasaInteresMensual, plazoMeses) - 1);
         // esto lo agregué para que redondee el pago mensual a dos decimales
         BigDecimal pagoMensualRounded = new BigDecimal(pagoMensual).setScale(2, RoundingMode.HALF_UP);
 
@@ -106,6 +109,7 @@ public class PrestamoService {
         }
         return planPagos;
     }
+
     private PrestamoResponse.PlanPago convertirPlanPago(Prestamo.PlanPago planPago) {
         PrestamoResponse.PlanPago planPagoDto = new PrestamoResponse.PlanPago();
         planPagoDto.setCuotaNro(planPago.getCuotaNro());
@@ -115,18 +119,24 @@ public class PrestamoService {
 
         return planPagoDto;
     }
+
     public PrestamoClienteResponse obtenerPrestamosPorCliente(Long clienteId) {
         List<Prestamo> prestamos = prestamoDao.findByClienteId(clienteId);
-
+        if (prestamos == null) {
+            throw new RuntimeException("No se encontraron préstamos para el cliente con ID: " + clienteId);
+        }
         // Mapea los préstamos al formato requerido
-        List<PrestamoDto> prestamoDtos = prestamos.stream().map(prestamo -> {
-            PrestamoDto dto = new PrestamoDto();
-            dto.setMonto(prestamo.getMonto());
-            dto.setPlazoMeses(prestamo.getPlazoMeses());
-            dto.setPagosRealizados(prestamo.getPagosRealizados()); // Ajustado según el estado real de los pagos
-            dto.setSaldoRestante(prestamo.getSaldoRestante()); // Ajustado según el saldo real
-            return dto;
-        }).collect(Collectors.toList());
+        List<PrestamoDto> prestamoDtos = prestamos.stream().
+                filter(Objects::nonNull).
+                map(prestamo -> {
+
+                    PrestamoDto dto = new PrestamoDto();
+                    dto.setMonto(prestamo.getMonto());
+                    dto.setPlazoMeses(prestamo.getPlazoMeses());
+                    dto.setPagosRealizados(prestamo.getPagosRealizados()); // Ajustado según el estado real de los pagos
+                    dto.setSaldoRestante(prestamo.getSaldoRestante()); // Ajustado según el saldo real
+                    return dto;
+                }).collect(Collectors.toList());
 
         PrestamoClienteResponse response = new PrestamoClienteResponse();
         response.setNumeroCliente(clienteId);
@@ -168,10 +178,8 @@ public class PrestamoService {
         prestamoDao.save(prestamo);
     }
 
-
     //para encontrar un prestamo por ID.
     public Prestamo findById(Long id) {
         return prestamoDao.findById(id);
     }
 }
-

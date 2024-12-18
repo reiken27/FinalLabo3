@@ -1,13 +1,15 @@
 package ar.edu.utn.frbb.tup.model.entity;
 
-import ar.edu.utn.frbb.tup.model.TipoCuenta;
-import ar.edu.utn.frbb.tup.model.TipoMoneda;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import ar.edu.utn.frbb.tup.controller.ClienteDto;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import ar.edu.utn.frbb.tup.controller.ClienteDto;
+import ar.edu.utn.frbb.tup.model.TipoCuenta;
+import ar.edu.utn.frbb.tup.model.TipoMoneda;
 
 public class Cliente extends Persona {
 
@@ -17,7 +19,7 @@ public class Cliente extends Persona {
     private LocalDate fechaAlta;
 
     @JsonIgnore
-    private Set<Cuenta> cuentas = new HashSet<>();
+    private final Set<Cuenta> cuentas = new HashSet<>();
 
     public Cliente() {
         super();
@@ -37,6 +39,7 @@ public class Cliente extends Persona {
     public void setId(Long id) {
         this.id = id;
     }
+
     public String getTipoPersona() {
         return tipoPersona;
     }
@@ -88,11 +91,11 @@ public class Cliente extends Persona {
 
     @Override
     public String toString() {
-        return "Cliente{" +
-                "tipoPersona=" + tipoPersona +
-                ", banco='" + banco + '\'' +
-                ", fechaAlta=" + fechaAlta +
-                ", cuentas=" + cuentas +
-                '}';
+        return "Cliente{"
+                + "tipoPersona=" + tipoPersona
+                + ", banco='" + banco + '\''
+                + ", fechaAlta=" + fechaAlta
+                + ", cuentas=" + cuentas
+                + '}';
     }
 }

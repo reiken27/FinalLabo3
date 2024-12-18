@@ -1,21 +1,23 @@
 package ar.edu.utn.frbb.tup.controller;
 
-import ar.edu.utn.frbb.tup.service.PrestamoService;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import ar.edu.utn.frbb.tup.service.PrestamoService;
 
 @ExtendWith(MockitoExtension.class)
 class PrestamoControllerTest {
@@ -38,6 +40,7 @@ class PrestamoControllerTest {
     void testSolicitarPrestamo() {
 
         PrestamoRequest request = new PrestamoRequest();
+        request.setDniCliente(12345678L);
         PrestamoResponse response = new PrestamoResponse();
         // Configura el mock para devolver la respuesta
         when(prestamoService.SolicitarPrestamo(request)).thenReturn(response);
@@ -72,7 +75,6 @@ class PrestamoControllerTest {
         response.setPrestamos(Collections.emptyList());
         when(prestamoService.obtenerPrestamosPorCliente(clienteId)).thenReturn(response);
 
-
         ResponseEntity<PrestamoClienteResponse> result = prestamoController.getPrestamosByClienteId(clienteId);
 
         assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
@@ -82,7 +84,7 @@ class PrestamoControllerTest {
     @Test
     void testGetPrestamosByClienteId_Exception() {
 
-        Long clienteId = 1L;
+        Long clienteId = 12345678L;
         when(prestamoService.obtenerPrestamosPorCliente(clienteId)).thenThrow(new RuntimeException());
 
         ResponseEntity<PrestamoClienteResponse> result = prestamoController.getPrestamosByClienteId(clienteId);
