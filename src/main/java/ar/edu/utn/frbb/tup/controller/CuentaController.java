@@ -36,7 +36,7 @@ public class CuentaController {
     private CuentaValidator cuentaValidator;
 
     //Este POST es para crear una cuenta
-    @PostMapping("/crearCuenta")
+    @PostMapping()
     public ResponseEntity<String> crearCuenta(@RequestBody CuentaDto cuentaDto) {
         try {
             // Validaciones delegadas al validador
@@ -65,7 +65,7 @@ public class CuentaController {
     }
 
     //Este GET obtiene todas las cuentas existentes.
-    @GetMapping("/cuentas")
+    @GetMapping()
     public ResponseEntity<List<Cuenta>> obtenerTodasLasCuentas() {
         try {
             List<Cuenta> cuentas = cuentaService.obtenerTodasLasCuentas();

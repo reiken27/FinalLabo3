@@ -38,7 +38,7 @@ public class ClienteController {
 
     // En este POST se crea un nuevo cliente. Primero, verifica si el tipo de persona es válido ('fisica' o 'juridica').
     // Luego, convierte la información del cliente desde el DTO a un objeto Cliente y lo guarda en el servicio.
-    @PostMapping("/crearCliente")
+    @PostMapping()
     public Cliente crearCliente(@RequestBody ClienteDto clienteDto) throws ClienteAlreadyExistsException, TipoPersonaInvalidoException {
         // Validar ClienteDto
         clienteValidator.validate(clienteDto);
